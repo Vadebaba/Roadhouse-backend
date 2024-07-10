@@ -8,12 +8,31 @@ const multer = require('multer');
 const path = require('path');
 const cors = require('cors');
 
-app.use(express.json());
+//app.use(express.json());
 
 //Database connection with mongodb
 mongoose.connect=(`${process.env.RH}`)
 
-app.use(function(req, res, next) {
+const corsOptions = {
+    origin: 'https://roadhouse-admin.vercel.app',
+    methods: 'GET, POST, OPTIONS, PUT, DELETE',
+    allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept'
+  };
+  
+  app.use(cors(corsOptions));
+  
+  app.use(express.json());
+  
+  app.post('/addproduct', (req, res) => {
+    // Your logic to add the product
+    res.json({ message: 'Product added successfully' });
+  });
+  
+
+
+
+
+/*app.use(function(req, res, next) {
     // res.header("Access-Control-Allow-Origin", "*");
     const allowedOrigins = ['http://roadhouse-admin.vercel.app', 'https://roadhouse-admin.vercel.app'];
     const origin = req.headers.origin;
@@ -26,7 +45,7 @@ app.use(function(req, res, next) {
     next();
   });
 
-/*app.use(function (req, res, next) {
+app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "https://urlshtnr.vercel.app");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
