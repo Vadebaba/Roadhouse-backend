@@ -31,35 +31,6 @@ const corsOptions = {
 
 
 
-
-/*app.use(function(req, res, next) {
-    // res.header("Access-Control-Allow-Origin", "*");
-    const allowedOrigins = ['http://roadhouse-admin.vercel.app', 'https://roadhouse-admin.vercel.app'];
-    const origin = req.headers.origin;
-    if (allowedOrigins.includes(origin)) {
-         res.setHeader('Access-Control-Allow-Origin', origin);
-    }
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-    res.header("Access-Control-Allow-credentials", true);
-    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, UPDATE");
-    next();
-  });
-
-app.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", "https://urlshtnr.vercel.app");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
-    next();;
-  });
-
-
-app.use(cors({
-    origin: 'https://roadhouse-admin.vercel.app', // use your actual domain name (or localhost), using * is not recommended
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Origin', 'X-Requested-With', 'Accept', 'x-client-key', 'x-client-token', 'x-client-secret', 'Authorization'],
-    credentials: true
-}));*/
-
 //Api craetion
 app.get('/', (req, res) => {
     res.send("Express App is running");
@@ -71,8 +42,35 @@ app.get('/allproducts', (req, res) => {
   });
 
 
+  const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+      cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+    }
+  });
+  
+  const upload = multer({ storage: storage });
+  
+  app.post('/upload', upload.single('image'), (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ success: false, message: 'No file uploaded' });
+      }
+      // Assuming you store the file URL in the response
+      const imageUrl = `/uploads/${req.file.filename}`;
+      res.json({ success: true, image_url: imageUrl });
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  });
+  
 
-//image storage engine
+
+
+/*image storage engine
 const storage = multer.diskStorage({
     destination: './upload/images',
     filename: (req, file, cb) => {
@@ -92,7 +90,7 @@ app.post("/upload", upload.single('product'), (req, res) => {
         image_url: `https://roadhouse-backend.onrender.com/images/${req.file.filename}`
     })
 })
-
+*/
 
 //scheme for creatig products
 const Product = mongoose.model("Product", {
