@@ -1,5 +1,5 @@
 const port = 4000;
-import express, { json } from 'express';
+const express = require('express');
 const app = express();
 import { connect, model } from 'mongoose';
 import { sign, verify } from 'jsonwebtoken';
@@ -7,7 +7,7 @@ import multer, { diskStorage } from 'multer';
 import { extname } from 'path';
 //const cors = require('cors');
 
-app.use(json());
+app.use(express.json());
 
 //Database connection with mongodb
 connect = (`${process.env.RH}`)
@@ -53,7 +53,7 @@ const upload = multer({ storage: storage });
 
 
 //creating upload endpoint for image
-app.use('/images', static('upload/images'))
+app.use('/images', express.static('upload/images'))
 app.post("/upload", upload.single('product'), (req, res) => {
     res.json({
         success: 1,
