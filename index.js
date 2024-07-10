@@ -12,10 +12,22 @@ app.use(express.json());
 //Database connection with mongodb
 mongoose.connect = (`${process.env.RH}`)
 
+const corsOptions = {
+    origin: 'https://roadhouse-admin.vercel.app',
+    methods: 'GET, POST, OPTIONS, PUT, DELETE',
+    allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept',
+    preflightContinue: false,
+    optionsSuccessStatus: 204
+};
+
+app.use(cors(corsOptions));
+
 //Api craetion
 app.get('/', (req, res) => {
     res.send("Express App is running");
 })
+
+
 
 app.get('/allproducts', (req, res) => {
     // Your code to fetch and return products
@@ -41,7 +53,7 @@ app.use('/images', express.static('upload/images'))
 app.post("/upload", upload.single('product'), (req, res) => {
     res.json({
         success: 1,
-        image_url: `https://rh-ecommerce-backend.onrender.com/images/${req.file.filename}`
+        image_url: `https://roadhouse-admin.vercel.app/images/${req.file.filename}`
     })
 })
 
@@ -267,15 +279,7 @@ app.post('/getcart', fetchUser, async (req, res) => {
     next();
   });*/}
 
-const corsOptions = {
-    origin: 'https://roadhouse-admin.vercel.app',
-    methods: 'GET, POST, OPTIONS, PUT, DELETE',
-    allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept',
-    preflightContinue: false,
-    optionsSuccessStatus: 204
-};
 
-app.use(cors(corsOptions));
 
 
 
