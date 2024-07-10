@@ -10,7 +10,7 @@ const cors = require('cors');
 app.use(express.json());
 
 //Database connection with mongodb
-mongoose.connect=(`${process.env.RH}`)
+mongoose.connect = (`${process.env.RH}`)
 
 //Api craetion
 app.get('/', (req, res) => {
@@ -20,7 +20,7 @@ app.get('/', (req, res) => {
 app.get('/allproducts', (req, res) => {
     // Your code to fetch and return products
     res.json({ products: [] }); // Example response
-  });
+});
 
 
 
@@ -246,8 +246,8 @@ app.post('/addtocart', fetchUser, async (req, res) => {
 app.post('/removefromcart', fetchUser, async (req, res) => {
     console.log("Removed", req.body.itemId)
     let userData = await User.findOne({ _id: req.user.id });
-    if(userData.cartData[req.body.itemId] >0)
-    userData.cartData[req.body.itemId] -= 1;
+    if (userData.cartData[req.body.itemId] > 0)
+        userData.cartData[req.body.itemId] -= 1;
     await User.findOneAndUpdate({ _id: req.user.id }, { cartData: userData.cartData });
     res.send("Removed");
 })
@@ -257,7 +257,7 @@ app.post('/removefromcart', fetchUser, async (req, res) => {
 app.post('/getcart', fetchUser, async (req, res) => {
     console.log('Get cart');
     let userData = await User.findOne({ _id: req.user.id });
-   res.json(userData.cartData);
+    res.json(userData.cartData);
 })
 
 {/*app.use(function (req, res, next) {
@@ -267,18 +267,17 @@ app.post('/getcart', fetchUser, async (req, res) => {
     next();
   });*/}
 
-  app.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", "https://roadhouse-admin.vercel.app");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
-  
-    // Handle OPTIONS method
-    if (req.method === 'OPTIONS') {
-      return res.sendStatus(200);
-    }
-  
-    next();
-  });
+const corsOptions = {
+    origin: 'https://roadhouse-admin.vercel.app',
+    methods: 'GET, POST, OPTIONS, PUT, DELETE',
+    allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept',
+    preflightContinue: false,
+    optionsSuccessStatus: 204
+};
+
+app.use(cors(corsOptions));
+
+
 
 
 
