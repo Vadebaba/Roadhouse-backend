@@ -1,50 +1,42 @@
+
 const port = 4000;
 const express = require('express');
 const app = express();
-import { connect, model } from 'mongoose';
-import { sign, verify } from 'jsonwebtoken';
-import multer, { diskStorage } from 'multer';
-import { extname } from 'path';
-//const cors = require('cors');
+const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const path = require('path');
+const cors = require('cors');
 
 app.use(express.json());
 
 //Database connection with mongodb
-connect = (`${process.env.RH}`)
+mongoose.connect=(`${process.env.RH}`)
 
-app.use(function (req, res, next) {
-    const allowedOrigins = ['https://roadhouse-admin.vercel.app', 'http://roadhouse-admin.vercel.app'];
-    const origin = req.headers.origin;
-    if (allowedOrigins.includes(origin)) {
-        res.header("Access-Control-Allow-Origin", origin);
-    }
-
-    res.header("Access-Control-Allow-credentials", true);
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
-
-    next();
-});
+app.use(cors({
+    origin: 'https://roadhouse-admin.vercel.app', // use your actual domain name (or localhost), using * is not recommended
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Origin', 'X-Requested-With', 'Accept', 'x-client-key', 'x-client-token', 'x-client-secret', 'Authorization'],
+    credentials: true
+}));
 
 //Api craetion
 app.get('/', (req, res) => {
     res.send("Express App is running");
 })
 
-
-
 app.get('/allproducts', (req, res) => {
     // Your code to fetch and return products
     res.json({ products: [] }); // Example response
-});
+  });
 
 
 
 //image storage engine
-const storage = diskStorage({
+const storage = multer.diskStorage({
     destination: './upload/images',
     filename: (req, file, cb) => {
-        return cb(null, `${file.fieldname}_${Date.now()}${extname
+        return cb(null, `${file.fieldname}_${Date.now()}${path.extname
             (file.originalname)}`)
     }
 })
@@ -57,13 +49,13 @@ app.use('/images', express.static('upload/images'))
 app.post("/upload", upload.single('product'), (req, res) => {
     res.json({
         success: 1,
-        image_url: `https://roadhouse-admin.vercel.app/images/${req.file.filename}`
+        image_url: `https://roadhouse-backend.onrender.com/images/${req.file.filename}`
     })
 })
 
 
 //scheme for creatig products
-const Product = model("Product", {
+const Product = mongoose.model("Product", {
     id: {
         type: Number,
         required: true,
@@ -145,7 +137,7 @@ app.get('/allproducts', async (req, res) => {
 
 
 //scheme user model
-const User = model('User', {
+const User = mongoose.model('User', {
     name: {
         type: String,
     },
@@ -191,7 +183,7 @@ app.post('/signup', async (req, res) => {
             id: user.id
         }
     }
-    const token = sign(data, "secret_ecom");
+    const token = jwt.sign(data, "secret_ecom");
     res.json({ success: true, token })
 })
 
@@ -206,7 +198,7 @@ app.post('/login', async (req, res) => {
                     id: user.id
                 }
             }
-            const token = sign(data, "secret_ecom");
+            const token = jwt.sign(data, "secret_ecom");
             res.json({ success: true, token });
         } else {
             res.json({ success: false, errors: "wrong password" });
@@ -240,7 +232,7 @@ const fetchUser = async (req, res, next) => {
         res.status(401).send({ errors: "Please authenticate using a valid login" })
     } else {
         try {
-            const data = verify(token, 'secret_ecom');
+            const data = jwt.verify(token, 'secret_ecom');
             req.user = data.user;
             next();
         } catch (error) {
@@ -262,8 +254,8 @@ app.post('/addtocart', fetchUser, async (req, res) => {
 app.post('/removefromcart', fetchUser, async (req, res) => {
     console.log("Removed", req.body.itemId)
     let userData = await User.findOne({ _id: req.user.id });
-    if (userData.cartData[req.body.itemId] > 0)
-        userData.cartData[req.body.itemId] -= 1;
+    if(userData.cartData[req.body.itemId] >0)
+    userData.cartData[req.body.itemId] -= 1;
     await User.findOneAndUpdate({ _id: req.user.id }, { cartData: userData.cartData });
     res.send("Removed");
 })
@@ -273,19 +265,8 @@ app.post('/removefromcart', fetchUser, async (req, res) => {
 app.post('/getcart', fetchUser, async (req, res) => {
     console.log('Get cart');
     let userData = await User.findOne({ _id: req.user.id });
-    res.json(userData.cartData);
+   res.json(userData.cartData);
 })
-
-{/*app.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", "https://roadhouse-admin.vercel.app");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
-    next();
-  });*/}
-
-
-
-
 
 
 
