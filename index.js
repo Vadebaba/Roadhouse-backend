@@ -1,26 +1,30 @@
 const port = 4000;
-const express = require('express');
+import express, { json } from 'express';
 const app = express();
-const mongoose = require('mongoose');
-const jwt = require('jsonwebtoken');
-const multer = require('multer');
-const path = require('path');
-const cors = require('cors');
+import { connect, model } from 'mongoose';
+import { sign, verify } from 'jsonwebtoken';
+import multer, { diskStorage } from 'multer';
+import { extname } from 'path';
+//const cors = require('cors');
 
-app.use(express.json());
+app.use(json());
 
 //Database connection with mongodb
-mongoose.connect = (`${process.env.RH}`)
+connect = (`${process.env.RH}`)
 
-const corsOptions = {
-    origin: 'https://roadhouse-admin.vercel.app',
-    methods: 'GET, POST, OPTIONS, PUT, DELETE',
-    allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept',
-    preflightContinue: false,
-    optionsSuccessStatus: 204
-};
+app.use(function (req, res, next) {
+    const allowedOrigins = ['https://roadhouse-admin.vercel.app', 'http://roadhouse-admin.vercel.app'];
+    const origin = req.headers.origin;
+    if (allowedOrigins.includes(origin)) {
+        res.header("Access-Control-Allow-Origin", origin);
+    }
 
-app.use(cors(corsOptions));
+    res.header("Access-Control-Allow-credentials", true);
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
+
+    next();
+});
 
 //Api craetion
 app.get('/', (req, res) => {
@@ -37,10 +41,10 @@ app.get('/allproducts', (req, res) => {
 
 
 //image storage engine
-const storage = multer.diskStorage({
+const storage = diskStorage({
     destination: './upload/images',
     filename: (req, file, cb) => {
-        return cb(null, `${file.fieldname}_${Date.now()}${path.extname
+        return cb(null, `${file.fieldname}_${Date.now()}${extname
             (file.originalname)}`)
     }
 })
@@ -49,7 +53,7 @@ const upload = multer({ storage: storage });
 
 
 //creating upload endpoint for image
-app.use('/images', express.static('upload/images'))
+app.use('/images', static('upload/images'))
 app.post("/upload", upload.single('product'), (req, res) => {
     res.json({
         success: 1,
@@ -59,7 +63,7 @@ app.post("/upload", upload.single('product'), (req, res) => {
 
 
 //scheme for creatig products
-const Product = mongoose.model("Product", {
+const Product = model("Product", {
     id: {
         type: Number,
         required: true,
@@ -141,7 +145,7 @@ app.get('/allproducts', async (req, res) => {
 
 
 //scheme user model
-const User = mongoose.model('User', {
+const User = model('User', {
     name: {
         type: String,
     },
@@ -187,7 +191,7 @@ app.post('/signup', async (req, res) => {
             id: user.id
         }
     }
-    const token = jwt.sign(data, "secret_ecom");
+    const token = sign(data, "secret_ecom");
     res.json({ success: true, token })
 })
 
@@ -202,7 +206,7 @@ app.post('/login', async (req, res) => {
                     id: user.id
                 }
             }
-            const token = jwt.sign(data, "secret_ecom");
+            const token = sign(data, "secret_ecom");
             res.json({ success: true, token });
         } else {
             res.json({ success: false, errors: "wrong password" });
@@ -236,7 +240,7 @@ const fetchUser = async (req, res, next) => {
         res.status(401).send({ errors: "Please authenticate using a valid login" })
     } else {
         try {
-            const data = jwt.verify(token, 'secret_ecom');
+            const data = verify(token, 'secret_ecom');
             req.user = data.user;
             next();
         } catch (error) {
