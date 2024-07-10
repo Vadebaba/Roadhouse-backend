@@ -260,12 +260,14 @@ app.post('/getcart', fetchUser, async (req, res) => {
    res.json(userData.cartData);
 })
 
-app.use(cors({
-    origin: 'https://rh-ecommerce-admin.vercel.app', // use your actual domain name (or localhost), using * is not recommended
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Origin', 'X-Requested-With', 'Accept', 'x-client-key', 'x-client-token', 'x-client-secret', 'Authorization'],
-    credentials: true
-}));
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "https://roadhouse-admin.vercel.app");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
+    next();;
+  });
+
+
 
 app.listen(port, (error) => {
     if (!error) {
