@@ -40,37 +40,9 @@ app.get('/allproducts', (req, res) => {
     // Your code to fetch and return products
     res.json({ products: [] }); // Example response
   });
+ 
 
-
-  const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-      cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-    }
-  });
-  
-  const upload = multer({ storage: storage });
-  
-  app.post('/upload', upload.single('image'), (req, res) => {
-    try {
-      if (!req.file) {
-        return res.status(400).json({ success: false, message: 'No file uploaded' });
-      }
-      // Assuming you store the file URL in the response
-      const imageUrl = `/uploads/${req.file.filename}`;
-      res.json({ success: true, image_url: imageUrl });
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      res.status(500).json({ success: false, message: 'Internal Server Error' });
-    }
-  });
-  
-
-
-
-/*image storage engine
+//image storage engine
 const storage = multer.diskStorage({
     destination: './upload/images',
     filename: (req, file, cb) => {
@@ -89,8 +61,7 @@ app.post("/upload", upload.single('product'), (req, res) => {
         success: 1,
         image_url: `https://roadhouse-backend.onrender.com/images/${req.file.filename}`
     })
-})
-*/
+});
 
 //scheme for creatig products
 const Product = mongoose.model("Product", {
