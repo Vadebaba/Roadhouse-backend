@@ -260,11 +260,24 @@ app.post('/getcart', fetchUser, async (req, res) => {
    res.json(userData.cartData);
 })
 
-app.use(function (req, res, next) {
+{/*app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "https://roadhouse-admin.vercel.app");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
-    next();;
+    next();
+  });*/}
+
+  app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "https://roadhouse-admin.vercel.app");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
+  
+    // Handle OPTIONS method
+    if (req.method === 'OPTIONS') {
+      return res.sendStatus(200);
+    }
+  
+    next();
   });
 
 
