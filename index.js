@@ -42,7 +42,34 @@ app.get('/allproducts', (req, res) => {
   });
  
 
-//image storage engine
+  const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, 'uploads/'); // Ensure this directory exists
+    },
+    filename: function (req, file, cb) {
+      cb(null, Date.now() + '-' + file.originalname);
+    }
+  });
+  
+  const upload = multer({ storage: storage });
+  
+  app.post('/upload', upload.single('product'), (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).send({ success: false, message: 'No file uploaded' });
+      }
+      const imageUrl = `https://roadhouse-backend.onrender.com/uploads/${req.file.filename}`;
+      res.status(200).send({ success: true, image_url: imageUrl });
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      res.status(500).send({ success: false, message: 'Internal Server Error' });
+    }
+  });
+  
+
+
+
+/*image storage engine
 const storage = multer.diskStorage({
     destination: './upload/images',
     filename: (req, file, cb) => {
@@ -61,7 +88,7 @@ app.post("/upload", upload.single('product'), (req, res) => {
         success: 1,
         image_url: `https://roadhouse-backend.onrender.com/images/${req.file.filename}`
     })
-});
+});*/
 
 //scheme for creatig products
 const Product = mongoose.model("Product", {
