@@ -126,7 +126,51 @@ const Product = mongoose.model("Product", {
     },
 })
 
+app.post('/addproduct', async (req, res) => {
+    try {
+      // Ensure the request body contains the required fields
+      const { name, image, category, new_price, old_price } = req.body;
+      if (!name || !image || !category || !new_price || !old_price) {
+        return res.status(400).json({ success: false, message: 'All fields are required' });
+      }
+  
+      // Fetch all products
+      let products = await Product.find({});
+  
+      // Determine the new product ID
+      let id;
+      if (products.length > 0) {
+        let last_product = products[products.length - 1];
+        id = last_product.id + 1;
+      } else {
+        id = 1;
+      }
+  
+      // Create a new product instance
+      const product = new Product({
+        id: id,
+        name: name,
+        image: image,
+        category: category,
+        new_price: new_price,
+        old_price: old_price,
+      });
+  
+      // Save the product to the database
+      await product.save();
+      console.log('Saved', product);
+  
+      // Respond with success
+      res.json({ success: true, name: name });
+    } catch (error) {
+      console.error('Error adding product:', error);
+      res.status(500).json({ success: false, message: 'Internal Server Error', error: error.message });
+    }
+  });
+  
 
+
+/*creating api to add products
 app.post('/addproduct', async (req, res) => {
     let products = await Product.find({});
     let id;
@@ -152,7 +196,7 @@ app.post('/addproduct', async (req, res) => {
         success: true,
         name: req.body.name,
     })
-});
+});*/
 
 //creating api to add products
 app.post('/removeproduct', async (req, res) => {
